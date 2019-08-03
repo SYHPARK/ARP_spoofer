@@ -1,4 +1,4 @@
-#include "getmacip.h"
+#include "getmymacip.h"
 
 int main() {
 	char* ip = "192.168.43.97";

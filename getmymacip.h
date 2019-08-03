@@ -5,7 +5,7 @@
 #include <Assert.h>
 #pragma comment(lib, "iphlpapi.lib")
 
-char* getMyMac(char* myip) {
+char* getMyMac(char* ethName) {
 	PIP_ADAPTER_INFO AdapterInfo;
 	DWORD dwBufLen = sizeof(IP_ADAPTER_INFO);
 	char *mac_addr = (char*)malloc(18);
@@ -34,7 +34,7 @@ char* getMyMac(char* myip) {
 		do {
 			// technically should look at pAdapterInfo->AddressLength
 			//   and not assume it is 6.
-			if (!strcmp(pAdapterInfo->IpAddressList.IpAddress.String, myip)) {	//my ip정보라면
+			if (!strcmp(pAdapterInfo->AdapterName, ethName)) {	//my ip정보라면
 				sprintf(mac_addr, "%02X:%02X:%02X:%02X:%02X:%02X",
 					pAdapterInfo->Address[0], pAdapterInfo->Address[1],
 					pAdapterInfo->Address[2], pAdapterInfo->Address[3],
