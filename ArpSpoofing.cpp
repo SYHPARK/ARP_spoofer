@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 	memset(ip, 0, sizeof(ip));
 	
 	//mydevice
-	//\Device\Tcpip_{6EF37E61-C314-41AB-BCCC-F1D5F1C3EAFA}
+	//{6EF37E61-C314-41AB-BCCC-F1D5F1C3EAFA}
 	//name, destination_ip, target_ip
 	strncpy(interfaceName, argv[1], strlen(argv[1]));
 	strncpy(ip, argv[2], strlen(argv[2]));
