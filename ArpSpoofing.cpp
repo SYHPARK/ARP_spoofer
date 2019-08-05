@@ -127,7 +127,7 @@ int arpReqGetmac(pcap_t* fp) {
 int main(int argc, char* argv[]) {
 	pcap_if_t* alldevs;
 	//findalldevs 정보 https://www.winpcap.org/docs/docs_412/html/structpcap__if.html
-	int inum;	int i = 0;
+	int inum = -1;	int i = 0;
 	pcap_t* fp;
 	char errbuf[PCAP_ERRBUF_SIZE];
 	if (pcap_findalldevs(&alldevs, errbuf) == -1) {
@@ -138,6 +138,10 @@ int main(int argc, char* argv[]) {
 	//pcap_t 구조체 정보 https://blog.silnex.kr/libpcapstruct-pcap_t/
 	for (pcap_if_t* dev = alldevs; dev; dev = dev->next) {
 		printf("%d. %s", ++i, dev->name);
+		int idx;
+		for (idx = 0; dev->name[idx] != '{'; idx++);
+		if (!strcmp(dev->name + idx, argv[1]))
+			inum = i;
 		if (dev->description)
 			printf(" (%s)\n", dev->description);
 		else
@@ -149,8 +153,8 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	printf("Enter the interface number(1-%d): ", i);
-	scanf("%d", &inum);
+//	printf("Enter the interface number(1-%d): ", i);
+//	scanf("%d", &inum);
 
 	if (inum<1 || inum>i) {
 		printf("\nInvalid number\n");
@@ -180,7 +184,7 @@ int main(int argc, char* argv[]) {
 	memset(ip, 0, sizeof(ip));
 	
 	//mydevice
-	//{6EF37E61-C314-41AB-BCCC-F1D5F1C3EAFA}
+	//\Device\Tcpip_{6EF37E61-C314-41AB-BCCC-F1D5F1C3EAFA}
 	//name, destination_ip, target_ip
 	strncpy(interfaceName, argv[1], strlen(argv[1]));
 	strncpy(ip, argv[2], strlen(argv[2]));
