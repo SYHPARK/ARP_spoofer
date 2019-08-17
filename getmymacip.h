@@ -35,7 +35,7 @@ char* getMyMac(char* ethName) {
 		do {
 			// technically should look at pAdapterInfo->AddressLength
 			//   and not assume it is 6.
-			if (!strcmp(pAdapterInfo->AdapterName, ethName)) {	//my ipÁ¤º¸¶ó¸é
+			if (!strcmp(pAdapterInfo->AdapterName, ethName)) {	//my ipì •ë³´ë¼ë©´
 				sprintf(mac_addr, "%02X:%02X:%02X:%02X:%02X:%02X",
 					pAdapterInfo->Address[0], pAdapterInfo->Address[1],
 					pAdapterInfo->Address[2], pAdapterInfo->Address[3],
@@ -82,7 +82,7 @@ char* getMyIP(char* ethName) {
 		do {
 			// technically should look at pAdapterInfo->AddressLength
 			//   and not assume it is 6.
-			if (!strcmp(pAdapterInfo->AdapterName, ethName)) {	//my ipÁ¤º¸¶ó¸é
+			if (!strcmp(pAdapterInfo->AdapterName, ethName)) {	//my ipì •ë³´ë¼ë©´
 				sprintf(mac_addr, pAdapterInfo->IpAddressList.IpAddress.String);
 				//myString.c_str()
 				//printf("Address: %s, mac: %s\n", pAdapterInfo->IpAddressList.IpAddress.String, mac_addr);
